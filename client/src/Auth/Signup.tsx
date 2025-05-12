@@ -4,13 +4,10 @@ import { Separator } from "@radix-ui/react-separator";
 import { Contact2, Loader2, LockKeyhole, Mail, User2 } from "lucide-react"
 import { Link } from "react-router-dom";
 import { useState,type ChangeEvent,type ChangeEventHandler, type FormEvent } from "react";
+import type { SignupInputState } from "@/Schema/userSchema";
+import { userSignupSchema, type LoginInputState } from "@/Schema/userSchema";
 
-type SignupInputState = {
-  fullname: string;
-  email: string;
-  password: string;
-  contact: string;
-}
+
 
 const Signup = () => {
 const [input, setInput] = useState<SignupInputState>({
@@ -19,6 +16,7 @@ const [input, setInput] = useState<SignupInputState>({
   password: "",
   contact: "",
 });
+const [errors, setErrors] = useState<Partial<SignupInputState>>({});
 const changeEventHandler = (e:ChangeEvent<HTMLInputElement>)=>{
   const {name, value} = e.target;
   setInput({...input,[name]:value});
@@ -26,6 +24,14 @@ const changeEventHandler = (e:ChangeEvent<HTMLInputElement>)=>{
 
 const loginSubmitHandler = (e:FormEvent) => {
   e.preventDefault();
+  // form validation 
+  const result = userSignupSchema.safeParse(input);
+  if(!result.success){
+    const fieldErrors = result.error.formErrors.fieldErrors;
+    setErrors(fieldErrors as Partial<SignupInputState>);
+    return;
+  }
+  // login api implementation
   console.log(input);
 }
 
@@ -46,6 +52,7 @@ const loginSubmitHandler = (e:FormEvent) => {
     onChange={changeEventHandler}
     className="pl-10 focus-visible:ring-1"/>
     <User2 className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none"></User2>
+    { errors && <span className="text-xs text-red-500">{errors.fullname}</span>}
     </div>
     </div>
     <div className="mb-4">
@@ -58,6 +65,7 @@ const loginSubmitHandler = (e:FormEvent) => {
     onChange={changeEventHandler}
     className="pl-10 focus-visible:ring-1"/>
     <Mail className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none"></Mail>
+    { errors && <span className="text-xs text-red-500">{errors.email}</span>}
     </div>
     </div>
     
@@ -71,6 +79,7 @@ const loginSubmitHandler = (e:FormEvent) => {
     onChange={changeEventHandler}
     className="pl-10 focus-visible:ring-1"/>
     <LockKeyhole className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none"></LockKeyhole>
+    { errors && <span className="text-xs text-red-500">{errors.password}</span>}
     </div>
     </div>
     <div className="mb-4">
@@ -83,6 +92,7 @@ const loginSubmitHandler = (e:FormEvent) => {
     onChange={changeEventHandler}
     className="pl-10 focus-visible:ring-1"/>
     <Contact2 className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none"></Contact2>
+    { errors && <span className="text-xs text-red-500">{errors.contact}</span>}
     </div>
     </div>
     <div className="mb-10">

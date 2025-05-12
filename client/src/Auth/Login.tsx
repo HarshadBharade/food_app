@@ -2,19 +2,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@radix-ui/react-separator";
 import { Loader2, LockKeyhole, Mail } from "lucide-react"
-import { Link } from "react-router-dom";
+import { Link, useActionData } from "react-router-dom";
 import { useState,type ChangeEvent,type ChangeEventHandler, type FormEvent } from "react";
+import { userLoginSchema, type LoginInputState } from "@/Schema/userSchema";
 
-type LoginInputState = {
-  email: string;
-  password: string;
-}
+
 
 const Login = () => {
 const [input, setInput] = useState<LoginInputState>({
   email: "",
   password: "",
 });
+const [errors, setErrors] = useState<Partial<LoginInputState>>({});
 const changeEventHandler = (e:ChangeEvent<HTMLInputElement>)=>{
   const {name, value} = e.target;
   setInput({...input,[name]:value});
@@ -22,6 +21,14 @@ const changeEventHandler = (e:ChangeEvent<HTMLInputElement>)=>{
 
 const loginSubmitHandler = (e:FormEvent) => {
   e.preventDefault();
+  // form validation
+  const result = userLoginSchema.safeParse(input);
+  if(!result.success){
+    const fieldErrors = result.error.formErrors.fieldErrors;
+    setErrors(fieldErrors as Partial<LoginInputState>);
+    return;
+  }
+  // login api implementation
   console.log(input);
 }
 
@@ -42,6 +49,7 @@ const loginSubmitHandler = (e:FormEvent) => {
     onChange={changeEventHandler}
     className="pl-10 focus-visible:ring-1"/>
     <Mail className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none"></Mail>
+    { errors && <span className="text-xs text-red-500">{errors.email}</span>}
     </div>
     </div>
     
@@ -55,6 +63,7 @@ const loginSubmitHandler = (e:FormEvent) => {
     onChange={changeEventHandler}
     className="pl-10 focus-visible:ring-1"/>
     <LockKeyhole className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none"></LockKeyhole>
+    { errors && <span className="text-xs text-red-500">{errors.password}</span>}
     </div>
     </div>
     <div className="mb-10">
@@ -64,6 +73,9 @@ const loginSubmitHandler = (e:FormEvent) => {
           
         )
       }
+      <div className="mt-4">
+        <Link to= '/forgot-password' className="hover:text-blue-500 hover:underline">Forgot Password</Link>
+      </div>
     </div>
     <Separator />
     <p className="mt-2">
